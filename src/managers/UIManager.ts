@@ -1,4 +1,5 @@
 import { STAR_2_THRESHOLD, STAR_3_THRESHOLD } from "../core/constants";
+import { type Color, GameMode } from "../types";
 
 export class UIManager {
   private pauseButton: HTMLButtonElement;
@@ -6,19 +7,20 @@ export class UIManager {
   private loseScreen: HTMLDivElement;
   private starContainer: HTMLDivElement;
   private timeBar: HTMLDivElement;
+  private colorChangeTimeBar: HTMLDivElement;
   private enemyCounter: HTMLDivElement;
   private boosterButton: HTMLButtonElement;
   private buttonsContainer: HTMLDivElement;
 
   constructor(
-    onStart: () => void,
+    onStart: (gameMode: GameMode) => void,
     onPauseToggle: () => void,
     onNextLevel: () => void,
     onRetryGame: () => void,
     onBoosterClick: () => void,
     toggleMute: () => boolean
   ) {
-    this.showStartButton(onStart);
+    this.showStartMenu(onStart);
 
     this.buttonsContainer = document.createElement("div");
     this.buttonsContainer.style.position = "absolute";
@@ -35,6 +37,7 @@ export class UIManager {
     this.boosterButton = this.createBoosterButton(onBoosterClick);
 
     this.timeBar = this.createTimeBar();
+    this.colorChangeTimeBar = this.createColorChangeTimeBar();
     this.enemyCounter = this.createEnemyCounter();
 
     this.winScreen = this.createEndScreen(
@@ -98,23 +101,45 @@ export class UIManager {
     return button;
   }
 
-  private showStartButton(onClick: () => void) {
+  private showStartMenu(onClick: (gameMode: GameMode) => void) {
+    const buttonsContainer = document.createElement("div");
+    Object.assign(buttonsContainer.style, {
+      position: "absolute",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "end",
+      rowGap: "4px",
+    });
+
     const startButton = this.createButton({
       label: "🎮 Start Game",
       style: {
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
         padding: "20px 40px",
       },
       onClick: () => {
-        startButton.remove();
-        onClick();
+        buttonsContainer.remove();
+        onClick(GameMode.normal);
       },
     });
 
-    document.body.appendChild(startButton);
+    const hardModeStartButton = this.createButton({
+      label: "👿 Hard Mode",
+      style: {
+        padding: "20px 40px",
+      },
+      onClick: () => {
+        buttonsContainer.remove();
+        onClick(GameMode.hard);
+      },
+    });
+
+    buttonsContainer.appendChild(startButton);
+    buttonsContainer.appendChild(hardModeStartButton);
+
+    document.body.appendChild(buttonsContainer);
   }
 
   private createMuteButton(onToggle: () => boolean) {
@@ -194,6 +219,38 @@ export class UIManager {
       this.timeBar.style.background = "#FEEE7D";
     } else {
       this.timeBar.style.background = "#FF6768";
+    }
+  }
+
+  private createColorChangeTimeBar() {
+    const bar = document.createElement("div");
+
+    Object.assign(bar.style, {
+      position: "absolute",
+      bottom: "0",
+      left: "0",
+      height: "10px",
+      width: "100%",
+      background: "#28CC75",
+      transition: "width 0.1s linear",
+      display: "none",
+    });
+
+    document.body.appendChild(bar);
+
+    return bar;
+  }
+
+  public updateColorChangeProgress(progress: number, gameColor: Color) {
+    const clamped = Math.max(0, Math.min(1, progress));
+    this.colorChangeTimeBar.style.width = `${clamped * 100}%`;
+
+    if (gameColor === "green") {
+      this.colorChangeTimeBar.style.background = "#28CC75";
+    } else if (gameColor === "blue") {
+      this.colorChangeTimeBar.style.background = "#298EEA";
+    } else {
+      this.colorChangeTimeBar.style.background = "#FF6768";
     }
   }
 
@@ -291,7 +348,7 @@ export class UIManager {
     this.loseScreen.style.display = "none";
   }
 
-  public showGameUI() {
+  public showGameUI(gameMode: GameMode) {
     this.pauseButton.style.display = "block";
 
     this.boosterButton.disabled = false;
@@ -303,9 +360,13 @@ export class UIManager {
     this.timeBar.style.display = "block";
 
     this.enemyCounter.style.display = "block";
+
+    if (gameMode === GameMode.hard) {
+      this.colorChangeTimeBar.style.display = "block";
+    }
   }
 
-  public hideGameUI() {
+  public hideGameUI(gameMode: GameMode) {
     this.pauseButton.style.display = "none";
 
     this.boosterButton.disabled = false;
@@ -317,5 +378,9 @@ export class UIManager {
     this.timeBar.style.display = "none";
 
     this.enemyCounter.style.display = "none";
+
+    if (gameMode === GameMode.hard) {
+      this.colorChangeTimeBar.style.display = "none";
+    }
   }
 }

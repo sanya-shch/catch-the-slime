@@ -1,0 +1,49 @@
+{
+  "frames": {
+    "redIdle_0.png": {
+      "frame": { "x": 32, "y": 64, "w": 64, "h": 64 },
+      "sourceSize": { "w": 64, "h": 64 },
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 }
+    },
+    "redIdle_1.png": {
+      "frame": { "x": 160, "y": 64, "w": 64, "h": 64 },
+      "sourceSize": { "w": 64, "h": 64 },
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 }
+    },
+    "redIdle_2.png": {
+      "frame": { "x": 288, "y": 64, "w": 64, "h": 64 },
+      "sourceSize": { "w": 64, "h": 64 },
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 }
+    },
+    "redIdle_3.png": {
+      "frame": { "x": 416, "y": 64, "w": 64, "h": 64 },
+      "sourceSize": { "w": 64, "h": 64 },
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 }
+    },
+    "redIdle_4.png": {
+      "frame": { "x": 544, "y": 64, "w": 64, "h": 64 },
+      "sourceSize": { "w": 64, "h": 64 },
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 }
+    },
+    "redIdle_5.png": {
+      "frame": { "x": 672, "y": 64, "w": 64, "h": 64 },
+      "sourceSize": { "w": 64, "h": 64 },
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 }
+    },
+    "redIdle_6.png": {
+      "frame": { "x": 800, "y": 64, "w": 64, "h": 64 },
+      "sourceSize": { "w": 64, "h": 64 },
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 }
+    },
+    "redIdle_7.png": {
+      "frame": { "x": 928, "y": 64, "w": 64, "h": 64 },
+      "sourceSize": { "w": 64, "h": 64 },
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 }
+    }
+  },
+  "meta": {
+    "image": "RedIdle.png",
+    "size": { "w": 1024, "h": 128 },
+    "scale": "1"
+  }
+}

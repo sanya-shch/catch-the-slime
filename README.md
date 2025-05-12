@@ -42,12 +42,19 @@ npm run start
  │   │   ├── Game.ts
  │   │   └── constants.ts
  │   ├── 📁entities/
- │   │   └── Enemy.ts
+ │   │   ├── Enemy.ts
+ │   │   ├── EnemyAssets.ts
+ │   │   └── EnemyBehavior.ts
  │   ├── 📁managers/
  │   │   ├── AssetManager.ts
  │   │   ├── LevelManager.ts
  │   │   ├── SoundManager.ts
  │   │   └── UIManager.ts
+ │   ├── 📁types/
+ │   │   └── index.ts
+ │   ├── 📁utils/
+ │   │   ├── colorUtils.ts
+ │   │   └── uiUtils.ts
  │   └── index.ts
  ├── .gitignore
  ├── package.json
@@ -63,3 +70,4 @@ npm run start
 ![Game](/assets/GameScreenshot.png)
 ![Won](/assets/WonScreenshot.png)
 ![Lose](/assets/LoseScreenshot.png)
+![HardMode](/assets/HardModeScreenshot.png)

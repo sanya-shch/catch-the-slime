@@ -18,33 +18,33 @@ export class SoundManager {
     this.loseSound = new Howl({ src: ["assets/sounds/lose.mp3"] });
   }
 
-  public playBg() {
+  public playBg = () => {
     if (this.killSound.playing()) this.killSound.stop();
     if (this.winSound.playing()) this.winSound.stop();
     if (this.loseSound.playing()) this.loseSound.stop();
 
     if (!this.bgSound.playing()) this.bgSound.play();
-  }
+  };
 
-  public stopBg() {
+  public stopBg = () => {
     this.bgSound.stop();
-  }
+  };
 
-  public playKill() {
+  public playKill = () => {
     this.killSound.play();
-  }
+  };
 
-  public playWin() {
+  public playWin = () => {
     this.winSound.play();
-  }
+  };
 
-  public playLose() {
+  public playLose = () => {
     this.loseSound.play();
-  }
+  };
 
-  public toggleMute() {
+  public toggleMute = () => {
     this.isMuted = !this.isMuted;
     Howler.mute(this.isMuted);
     return this.isMuted;
-  }
+  };
 }

@@ -1,24 +1,25 @@
-import { AnimatedSprite, Texture } from "pixi.js";
+import { AnimatedSprite } from "pixi.js";
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from "../core/constants";
+import type { Color } from "../types";
+import { EnemyAssets } from "./EnemyAssets";
+import type { EnemyBehavior } from "./EnemyBehavior";
 
 export class Enemy {
   public sprite: AnimatedSprite;
   public deadAnimation: AnimatedSprite;
   private isDead = false;
-  private speed;
   private dx: number;
   private dy: number;
-  private onKilled: () => void;
 
   constructor(
-    idleSheet: Texture[],
-    deadSheet: Texture[],
+    assets: EnemyAssets,
     x: number,
     y: number,
-    speed: number,
-    onKilled: () => void
+    private color: Color,
+    private speed: number,
+    private behavior: EnemyBehavior
   ) {
-    this.sprite = new AnimatedSprite(idleSheet);
+    this.sprite = new AnimatedSprite(assets.getIdleTextures(color));
     this.sprite.animationSpeed = speed;
     this.sprite.x = x;
     this.sprite.y = y;
@@ -27,21 +28,17 @@ export class Enemy {
     this.sprite.scale = 1.5;
     this.sprite.play();
 
-    this.deadAnimation = new AnimatedSprite(deadSheet);
+    this.deadAnimation = new AnimatedSprite(assets.getDeadTextures(color));
     this.deadAnimation.animationSpeed = 0.2;
     this.deadAnimation.loop = false;
     this.deadAnimation.visible = false;
     this.deadAnimation.scale = 1.5;
 
-    this.speed = speed;
-
     const angle = Math.random() * Math.PI * 2;
     this.dx = Math.cos(angle) * this.speed;
     this.dy = Math.sin(angle) * this.speed;
 
-    this.onKilled = onKilled;
-
-    this.sprite.on("pointerdown", () => this.kill());
+    this.sprite.on("pointerdown", this.handleClick);
   }
 
   update(delta: number) {
@@ -69,8 +66,13 @@ export class Enemy {
     this.sprite.zIndex = this.sprite.y;
   }
 
-  kill() {
+  private handleClick = () => {
     if (this.isDead) return;
+
+    this.behavior.onClick(this);
+  };
+
+  kill() {
     this.isDead = true;
 
     this.deadAnimation.x = this.sprite.x;
@@ -81,8 +83,6 @@ export class Enemy {
     this.deadAnimation.play();
 
     this.sprite.parent?.addChild(this.deadAnimation);
-
-    this.onKilled();
 
     setTimeout(() => {
       this.deadAnimation.visible = false;
@@ -102,5 +102,13 @@ export class Enemy {
   destroy() {
     this.sprite.destroy();
     this.deadAnimation.destroy();
+  }
+
+  getColor() {
+    return this.color;
+  }
+
+  getIsDead() {
+    return this.isDead;
   }
 }

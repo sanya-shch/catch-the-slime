@@ -1,14 +1,16 @@
-import { Application, Ticker, Assets, Sprite } from "pixi.js";
+import { type Application, Ticker } from "pixi.js";
 import { LevelManager } from "../managers/LevelManager";
 import { UIManager } from "../managers/UIManager";
-import { SoundManager } from "../managers/SoundManager";
-import { AssetManager } from "../managers/AssetManager";
+import type { AssetManager } from "../managers/AssetManager";
 import { BOOSTER_TIME, STAR_2_THRESHOLD, STAR_3_THRESHOLD } from "./constants";
+import { updateBodyBackground } from "../utils/uiUtils";
+import type { SoundManager } from "../managers/SoundManager";
+import type { Enemy } from "../entities/Enemy";
+import { type Color, GameMode } from "../types";
 
 export class Game {
   private levelManager: LevelManager;
   private uiManager: UIManager;
-  private assetManager: AssetManager;
   private enemyKilledCount = 0;
   private totalEnemies = 0;
   private levelTimeLimit = 0;
@@ -18,29 +20,30 @@ export class Game {
   private currentLevel = 1;
   private maxLevel = 3;
   private boosterUsed = false;
+  private gameMode: GameMode = GameMode.hard;
+  private gameColor: Color = "green";
+  private colorTimer = 0;
 
-  constructor(private app: Application, private soundManager: SoundManager) {
-    this.assetManager = new AssetManager();
+  constructor(
+    private app: Application,
+    private soundManager: SoundManager,
+    assetManager: AssetManager
+  ) {
     this.levelManager = new LevelManager(
       this.app.stage,
-      this.assetManager,
-      this.onEnemyKilled
+      assetManager,
+      this.shouldKill,
+      this.onEnemyKilled,
+      this.onWrongColorClick
     );
     this.uiManager = new UIManager(
-      this.startGame.bind(this),
+      this.onClickStartGame,
       this.togglePause,
       this.loadNextLevel,
       this.retryGame,
       this.useBooster,
-      () => this.soundManager.toggleMute()
+      this.soundManager.toggleMute
     );
-
-    this.init();
-  }
-
-  private async init() {
-    await this.loadBackground();
-    await this.assetManager.load();
   }
 
   private async startGame(levelNumber = this.currentLevel) {
@@ -57,17 +60,26 @@ export class Game {
 
     this.soundManager.playBg();
 
-    this.levelManager.loadLevel(levelData);
+    this.levelManager.loadLevel(levelData, this.gameMode);
 
     this.uiManager.updateEnemyCounter(this.enemyKilledCount, this.totalEnemies);
 
     this.boosterUsed = false;
 
-    this.uiManager.showGameUI();
+    this.uiManager.showGameUI(this.gameMode);
+
+    if (this.gameMode === GameMode.hard) {
+      updateBodyBackground(this.gameColor);
+    }
 
     this.app.ticker.add(this.update);
-    this.app.ticker.start();
   }
+
+  private onClickStartGame = (gameMode: GameMode) => {
+    this.gameMode = gameMode;
+
+    this.startGame();
+  };
 
   private togglePause = () => {
     this.isPaused = !this.isPaused;
@@ -86,6 +98,34 @@ export class Game {
   private update = ({ deltaMS }: Ticker) => {
     if (this.isPaused) return;
 
+    if (this.gameMode === GameMode.hard) {
+      this.colorTimer += deltaMS;
+
+      this.updateColorChangeProgressBar();
+
+      if (this.colorTimer >= 3000) {
+        this.colorTimer = 0;
+
+        const existingColors = Array.from(
+          new Set(
+            this.levelManager
+              .getEnemies()
+              .reduce<Color[]>(
+                (acc, enemy) =>
+                  !enemy.getIsDead() ? [...acc, enemy.getColor()] : acc,
+                []
+              )
+          )
+        );
+
+        const newColor =
+          existingColors[Math.floor(Math.random() * existingColors.length)];
+        this.gameColor = newColor;
+
+        updateBodyBackground(newColor);
+      }
+    }
+
     const now = performance.now();
     const deltaSeconds = (now - this.lastUpdateTime) / 1000;
     this.lastUpdateTime = now;
@@ -96,12 +136,22 @@ export class Game {
 
     if (this.remainingTime <= 0) {
       this.remainingTime = 0;
-      this.app.ticker.stop();
+      this.app.ticker.remove(this.update);
       this.endGame(false);
       return;
     }
 
     this.levelManager.update(deltaMS);
+  };
+
+  private shouldKill = (enemy: Enemy) => {
+    return (
+      this.gameMode === GameMode.normal || enemy.getColor() === this.gameColor
+    );
+  };
+
+  private onWrongColorClick = () => {
+    this.remainingTime = Math.max(0, this.remainingTime - 5);
   };
 
   private onEnemyKilled = () => {
@@ -114,7 +164,7 @@ export class Game {
       this.endGame(true);
 
       setTimeout(() => {
-        this.app.ticker.stop();
+        this.app.ticker.remove(this.update);
       }, 1000);
     }
   };
@@ -123,7 +173,7 @@ export class Game {
     this.levelManager.deactivateEnemies();
     this.soundManager.stopBg();
 
-    this.uiManager.hideGameUI();
+    this.uiManager.hideGameUI(this.gameMode);
 
     if (win) {
       const timeUsed = this.levelTimeLimit - this.remainingTime;
@@ -155,17 +205,6 @@ export class Game {
     this.startGame(this.currentLevel);
   };
 
-  private async loadBackground() {
-    Assets.add({ alias: "bg", src: "assets/background.jpg" });
-    const texture = await Assets.load("bg");
-
-    const bg = new Sprite(texture);
-    bg.width = this.app.screen.width;
-    bg.height = this.app.screen.height;
-
-    this.app.stage.addChildAt(bg, 0);
-  }
-
   private useBooster = () => {
     if (this.boosterUsed) return;
 
@@ -181,5 +220,10 @@ export class Game {
   private updateProgressBar() {
     const progress = this.remainingTime / this.levelTimeLimit;
     this.uiManager.updateTimeProgress(progress);
+  }
+
+  private updateColorChangeProgressBar() {
+    const progress = this.colorTimer / 3000;
+    this.uiManager.updateColorChangeProgress(progress, this.gameColor);
   }
 }

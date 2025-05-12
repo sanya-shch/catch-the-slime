@@ -1,10 +1,10 @@
 {
   "enemies": [
-    { "x": 100, "y": 200, "speed": 0.1 },
-    { "x": 300, "y": 250, "speed": 0.2 },
-    { "x": 500, "y": 150, "speed": 0.3 },
-    { "x": 200, "y": 100, "speed": 0.2 },
-    { "x": 400, "y": 180, "speed": 0.25 }
+    { "x": 100, "y": 200, "speed": 0.1, "color": "green" },
+    { "x": 300, "y": 250, "speed": 0.2, "color": "red" },
+    { "x": 500, "y": 150, "speed": 0.3, "color": "green" },
+    { "x": 200, "y": 100, "speed": 0.2, "color": "red" },
+    { "x": 400, "y": 180, "speed": 0.25, "color": "blue" }
   ],
   "timeLimit": 60
 }
